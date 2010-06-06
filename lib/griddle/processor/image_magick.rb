@@ -3,11 +3,16 @@ module Griddle
     class ImageMagick
       
       def crop
-        `convert #{File.expand_path(@destination_file.path)} -crop #{geometry} -gravity Center #{@destination_file.path}`
+        desat = desaturate? ? '-colorspace Gray' : ''
+        `convert #{File.expand_path(@destination_file.path)} -crop #{geometry} -gravity Center #{@destination_file.path} #{desat}`
       end
       
       def crop?
         @style.geometry =~ /#/
+      end
+            
+      def desaturate?
+        @style.geometry =~ /bw/
       end
       
       def file_width
@@ -19,7 +24,7 @@ module Griddle
       end
       
       def geometry
-        @geometry ||= @style.geometry.gsub(/#/,'')
+        @geometry ||= @style.geometry.gsub(/#/,'').gsub(/bw/,'')
       end
       
       def file_height
